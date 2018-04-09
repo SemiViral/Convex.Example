@@ -1,4 +1,4 @@
-﻿#region usings
+﻿#region USINGS
 
 using System;
 using System.Threading.Tasks;
@@ -7,28 +7,32 @@ using System.Threading.Tasks;
 
 namespace Convex.Example {
     internal static class Program {
-        private static IrcBot _bot;
+        #region MEMBERS
+
+        private static IrcBot Bot { get; set; }
+
+        #endregion
 
         private static async Task DebugRun() {
             do {
-                await _bot.Execute();
-            } while (_bot.Executing);
+                await Bot.Execute();
+            } while (Bot.Executing);
 
-            _bot.Dispose();
+            Bot.Dispose();
         }
 
         private static async Task InitialiseAndExecute() {
-            using (_bot = new IrcBot()) {
-                await _bot.Initialise();
+            using (Bot = new IrcBot()) {
+                await Bot.Initialise();
                 await DebugRun();
             }
         }
 
         private static void Main() {
-            InitialiseAndExecute()
-                .Wait();
+            InitialiseAndExecute().Wait();
 
-            Console.ReadLine();
+            Console.Write("Program terminated. Press any key to continue.");
+            Console.ReadKey();
         }
     }
 }

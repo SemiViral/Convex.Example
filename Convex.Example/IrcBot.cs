@@ -2,11 +2,12 @@
 
 using System;
 using System.Threading.Tasks;
+using Convex.Event;
+using Convex.Example.Event;
 using Convex.IRC;
 using Convex.IRC.ComponentModel.Event;
 using Convex.IRC.ComponentModel.Reference;
-using Convex.IRC.Model;
-using Convex.IRC.Plugin.Registrar;
+using Convex.Plugin.Registrar;
 using Serilog;
 using Serilog.Events;
 
@@ -14,51 +15,71 @@ using Serilog.Events;
 
 namespace Convex.Example {
     public class IrcBot : IDisposable {
+        #region MEMBERS
+
+        private string BotInfo => $"[Version {_bot.Version}] Evealyn is an IRC bot created by Antonio DiNostri as a primary learning project for C#.";
+
+        public bool IsInitialised { get; private set; }
+        public bool Executing => _bot.Server.Executing;
         private readonly Client _bot;
+        private readonly string[] _defaultChannels = {"#testgrounds"};
+
+        #endregion
 
         /// <summary>
         ///     Initialises class
         /// </summary>
         public IrcBot() {
             _bot = new Client("irc.foonetic.net", 6667);
-            _bot.Server.Channels.Add(new Channel("#testgrounds"));
+            _bot.Initialised += (sender, args) => OnLog(sender, new AdvancedLoggingEventArgs(LogEventLevel.Information, "Client initialized."));
+            _bot.Logged += (sender, args) => OnLog(sender, new AdvancedLoggingEventArgs(LogEventLevel.Information, args.Information));
+            _bot.Server.Connection.Flushed += (sender, args) => OnLog(sender, new AdvancedLoggingEventArgs(LogEventLevel.Information, $" >> {args.Information}"));
+            _bot.Server.ChannelMessaged += LogChannelMessage;
 
             Log.Logger = new LoggerConfiguration().WriteTo.RollingFile(_bot.ClientConfiguration.LogFilePath).WriteTo.LiterateConsole().CreateLogger();
         }
 
-        private string BotInfo => $"[Version {_bot.Version}] Evealyn is an IRC bot created by SemiViral as a primary learning project for C#.";
-
-        public bool Executing => _bot.Server.Executing;
+        #region INIT
 
         public async Task Initialise() {
             await _bot.Initialise();
             RegisterMethods();
 
-            _bot.Initialized += (source, e) => OnLog(source, new LogEventArgs(LogEventLevel.Information, "Client initialized."));
-            _bot.Log += (source, e) => OnLog(source, new LogEventArgs(LogEventLevel.Information, e.Contents));
-            _bot.Server.Connection.Flushed += (source, e) => OnLog(source, new LogEventArgs(LogEventLevel.Information, $" >> {e.Contents}"));
-            _bot.Server.ChannelMessaged += LogChannelMessage;
+            IsInitialised = true;
         }
 
-        private static Task OnLog(object source, LogEventArgs e) {
-            switch (e.Level) {
+        #endregion
+
+
+        #region RUNTIME
+
+        public async Task Execute() {
+            await _bot.BeginListenAsync();
+        }
+
+        #endregion
+
+        #region EVENTS
+
+        private static Task OnLog(object sender, AdvancedLoggingEventArgs args) {
+            switch (args.Level) {
                 case LogEventLevel.Verbose:
-                    Log.Verbose(e.Contents);
+                    Log.Verbose(args.Information);
                     break;
                 case LogEventLevel.Debug:
-                    Log.Debug(e.Contents);
+                    Log.Debug(args.Information);
                     break;
                 case LogEventLevel.Information:
-                    Log.Information(e.Contents);
+                    Log.Information(args.Information);
                     break;
                 case LogEventLevel.Warning:
-                    Log.Warning(e.Contents);
+                    Log.Warning(args.Information);
                     break;
                 case LogEventLevel.Error:
-                    Log.Error(e.Contents);
+                    Log.Error(args.Information);
                     break;
                 case LogEventLevel.Fatal:
-                    Log.Fatal(e.Contents);
+                    Log.Fatal(args.Information);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -69,20 +90,18 @@ namespace Convex.Example {
 
         private Task LogChannelMessage(object source, ServerMessagedEventArgs e) {
             if (e.Message.Command.Equals(Commands.PRIVMSG))
-                OnLog(this, new LogEventArgs(LogEventLevel.Information, $"<{e.Message.Origin} {e.Message.Nickname}> {e.Message.Args}"));
+                OnLog(this, new AdvancedLoggingEventArgs(LogEventLevel.Information, $"<{e.Message.Origin} {e.Message.Nickname}> {e.Message.Args}"));
             else if (e.Message.Command.Equals(Commands.ERROR))
-                OnLog(this, new LogEventArgs(LogEventLevel.Error, e.Message.RawMessage));
+                OnLog(this, new AdvancedLoggingEventArgs(LogEventLevel.Error, e.Message.RawMessage));
             else
-                OnLog(this, new LogEventArgs(LogEventLevel.Information, e.Message.RawMessage));
+                OnLog(this, new AdvancedLoggingEventArgs(LogEventLevel.Information, e.Message.RawMessage));
 
             return Task.CompletedTask;
         }
 
-        public async Task Execute() {
-            await _bot.Server.QueueAsync(_bot);
-        }
+        #endregion
 
-        #region register methods
+        #region REGISTRARS
 
         /// <summary>
         ///     Register all methods
@@ -95,12 +114,12 @@ namespace Convex.Example {
             if (e.Message.SplitArgs.Count < 2 || !e.Message.SplitArgs[1].Equals("info"))
                 return;
 
-            await _bot.Server.Connection.SendDataAsync(Commands.PRIVMSG, $"{e.Message.Origin} {BotInfo}");
+            await _bot.Server.Connection.SendDataAsync(this, new IrcCommandRecievedEventArgs(Commands.PRIVMSG, $"{e.Message.Origin} {BotInfo}"));
         }
 
         #endregion
 
-        #region dispose
+        #region DISPOSE
 
         private void Dispose(bool disposing) {
             if (disposing)
@@ -117,14 +136,5 @@ namespace Convex.Example {
         }
 
         #endregion
-    }
-
-    internal class LogEventArgs : BasicEventArgs {
-        public LogEventArgs(LogEventLevel logLevel, string contents) : base(contents) {
-            Level = logLevel;
-            Contents = contents;
-        }
-
-        public LogEventLevel Level { get; }
     }
 }
