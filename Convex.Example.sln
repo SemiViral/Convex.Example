@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Convex.Example\bin\Debug\netcoreapp2.0\Resources\config.json = Convex.Example\bin\Debug\netcoreapp2.0\Resources\config.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Convex.Example.Plugin", "Convex.Example.Plugin\Convex.Example.Plugin.csproj", "{9DD5700E-FD8B-4575-9009-162501A0BDEF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Convex.Example.Plugin", "Convex.Example.Plugin\Convex.Example.Plugin.csproj", "{9DD5700E-FD8B-4575-9009-162501A0BDEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
