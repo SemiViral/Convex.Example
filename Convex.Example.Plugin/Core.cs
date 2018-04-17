@@ -25,13 +25,11 @@ namespace Convex.Example.Plugin {
         #region MEMBERS
 
         public string Name => "Core";
-        public string Author => "SemiViral";
-
+        public string Author => "Antonio DiNostri";
         public Version Version => new AssemblyName(GetType().GetTypeInfo().Assembly.FullName).Version;
-
         public string Id => Guid.NewGuid().ToString();
-
         public PluginStatus Status { get; private set; } = PluginStatus.Stopped;
+
         private readonly InlineCalculator _calculator = new InlineCalculator();
         private readonly Regex _youtubeRegex = new Regex(@"(?i)http(?:s?)://(?:www\.)?youtu(?:be\.com/watch\?v=|\.be/)(?<ID>[\w\-]+)(&(amp;)?[\w\?=‌​]*)?", RegexOptions.Compiled);
 
@@ -100,26 +98,22 @@ namespace Convex.Example.Plugin {
 
         #region REGISTRARS
 
-        private async Task Default(ServerMessagedEventArgs e)
-        {
+        private async Task Default(ServerMessagedEventArgs e) {
             if (e.Caller.IgnoreList.Contains(e.Message.Realname))
                 return;
 
             if (!e.Message.SplitArgs[0].Replace(",", string.Empty).Equals(e.Caller.ClientConfiguration.Nickname.ToLower()))
                 return;
 
-            if (e.Message.SplitArgs.Count < 2)
-            {
+            if (e.Message.SplitArgs.Count < 2) {
                 // typed only 'eve'
                 await DoCallback(this, new PluginActionEventArgs(PluginActionType.SendMessage, new IrcCommandRecievedEventArgs($"{Commands.PRIVMSG} {e.Message.Origin}", "Type 'eve help' to view my command list."), Name));
                 return;
             }
 
             // built-in 'help' command
-            if (e.Message.SplitArgs[1].ToLower().Equals("help"))
-            {
-                if (e.Message.SplitArgs.Count.Equals(2))
-                {
+            if (e.Message.SplitArgs[1].ToLower().Equals("help")) {
+                if (e.Message.SplitArgs.Count.Equals(2)) {
                     // in this case, 'help' is the only text in the string.
                     List<Tuple<string, string>> entries = e.Caller.LoadedCommands.Values.ToList();
                     string commandsReadable = string.Join(", ", entries.Where(entry => entry != null).Select(entry => entry.Item1));
