@@ -68,11 +68,11 @@ namespace Convex.Example.Plugin {
                 await Log($"Stop called but process is running from: {Name}");
             } else {
                 await Log($"Plugin stopping: {Name}");
-                await Call_Die();
+                await CallDie();
             }
         }
 
-        public async Task Call_Die() {
+        public async Task CallDie() {
             Status = PluginStatus.Stopped;
             await Log($"Calling die, stopping process, sending unload —— plugin: {Name}");
         }
