@@ -24,13 +24,13 @@
 
   <ItemGroup>
     <Reference Include="Convex.Event">
-      <HintPath>..\..\Convex.Event\Convex.Event\bin\Debug\netstandard2.0\Convex.Event.dll</HintPath>
+      <HintPath>..\..\Convex.Event\Convex.Event\bin\Debug\netcoreapp2.0\Convex.Event.dll</HintPath>
     </Reference>
     <Reference Include="Convex.IRC">
-      <HintPath>..\..\Convex.IRC\Convex.IRC\bin\Debug\netstandard2.0\Convex.IRC.dll</HintPath>
+      <HintPath>..\..\Convex.IRC\Convex.IRC\bin\Debug\netcoreapp2.0\Convex.IRC.dll</HintPath>
     </Reference>
     <Reference Include="Convex.Plugin">
-      <HintPath>..\..\Convex.Plugin\Convex.Plugin\bin\Debug\netstandard2.0\Convex.Plugin.dll</HintPath>
+      <HintPath>..\..\Convex.Plugin\Convex.Plugin\bin\Debug\netcoreapp2.0\Convex.Plugin.dll</HintPath>
     </Reference>
   </ItemGroup>
 

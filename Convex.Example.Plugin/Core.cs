@@ -59,8 +59,6 @@ namespace Convex.Example.Plugin {
             await DoCallback(this, new PluginActionEventArgs(PluginActionType.RegisterMethod, new MethodRegistrar<ServerMessagedEventArgs>(Define, e => e.InputEquals("define"), Commands.PRIVMSG, new Tuple<string, string>(nameof(Define), "(< word> *<part of speech>) — returns definition for given word.")), Name));
 
             await DoCallback(this, new PluginActionEventArgs(PluginActionType.RegisterMethod, new MethodRegistrar<ServerMessagedEventArgs>(Lookup, e => e.InputEquals("lookup"), Commands.PRIVMSG, new Tuple<string, string>(nameof(Lookup), "(<term/phrase>) — returns the wikipedia summary of given term or phrase.")), Name));
-
-            await DoCallback(this, new PluginActionEventArgs(PluginActionType.RegisterMethod, new MethodRegistrar<ServerMessagedEventArgs>(Users, e => e.InputEquals("users"), Commands.PRIVMSG, new Tuple<string, string>(nameof(Users), "returns a list of stored user realnames.")), Name));
         }
 
         public async Task Stop() {
@@ -187,10 +185,8 @@ namespace Convex.Example.Plugin {
             Status = PluginStatus.Processing;
 
             string message = string.Empty;
-
-            if (args.Caller.GetUser(args.Message.Realname)?.Access > 1)
-                message = "Insufficient permissions.";
-            else if (args.Message.SplitArgs.Count < 3)
+            
+            if (args.Message.SplitArgs.Count < 3)
                 message = "Insufficient parameters. Type 'eve help join' to view command's help index.";
             else if (args.Message.SplitArgs.Count < 2 || !args.Message.SplitArgs[2].StartsWith("#"))
                 message = "Channel name must start with '#'.";
@@ -217,9 +213,7 @@ namespace Convex.Example.Plugin {
 
             IrcCommandRecievedEventArgs command = new IrcCommandRecievedEventArgs($"{Commands.PRIVMSG} {args.Message.Origin}", string.Empty);
 
-            if (args.Caller.GetUser(args.Message.Realname)?.Access > 1)
-                command.Arguments = "Insufficient permissions.";
-            else if (args.Message.SplitArgs.Count < 3)
+            if (args.Message.SplitArgs.Count < 3)
                 command.Arguments = "Insufficient parameters. Type 'eve help part' to view command's help index.";
             else if (args.Message.SplitArgs.Count < 2 || !args.Message.SplitArgs[2].StartsWith("#"))
                 command.Arguments = "Channel parameter must be a proper name (starts with '#').";
@@ -307,6 +301,7 @@ namespace Convex.Example.Plugin {
 
             Dictionary<string, string> _out = new Dictionary<string, string> {{"word", (string)entry["results"][0]["headword"]}, {"pos", (string)entry["results"][0]["part_of_speech"]}};
 
+            // todo optimise if block
             // this 'if' block seems messy and unoptimised.
             // I'll likely change it in the future.
             if (entry["results"][0]["senses"][0]["subsenses"] != null) {
@@ -371,14 +366,6 @@ namespace Convex.Example.Plugin {
             Status = PluginStatus.Stopped;
         }
 
-        private async Task Users(ServerMessagedEventArgs args) {
-            Status = PluginStatus.Running;
-
-            await DoCallback(this, new PluginActionEventArgs(PluginActionType.SendMessage, new IrcCommandRecievedEventArgs($"{Commands.PRIVMSG} {args.Message.Origin}", string.Join(", ", args.Caller.GetAllUsers())), Name));
-
-            Status = PluginStatus.Stopped;
-        }
-
         private async Task Set(ServerMessagedEventArgs args) {
             if (args.Message.SplitArgs.Count < 2 || !args.Message.SplitArgs[1].Equals("set"))
                 return;
@@ -392,9 +379,6 @@ namespace Convex.Example.Plugin {
                 await DoCallback(this, new PluginActionEventArgs(PluginActionType.SendMessage, command, Name));
                 return;
             }
-
-            if (args.Caller.GetUser(args.Message.Nickname)?.Access > 0)
-                command.Arguments = "Insufficient permissions.";
 
             Status = PluginStatus.Stopped;
         }
