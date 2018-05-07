@@ -192,7 +192,7 @@ namespace Convex.Example.Plugin {
 
             string message = string.Empty;
             
-            else if (args.Message.SplitArgs.Count < 3)
+            if (args.Message.SplitArgs.Count < 3)
                 message = "Insufficient parameters. Type 'eve help join' to view command's help index.";
             else if (args.Message.SplitArgs.Count < 2 || !args.Message.SplitArgs[2].StartsWith("#"))
                 message = "Channel name must start with '#'.";
@@ -219,9 +219,7 @@ namespace Convex.Example.Plugin {
 
             IrcCommandRecievedEventArgs command = new IrcCommandRecievedEventArgs($"{Commands.PRIVMSG} {args.Message.Origin}", string.Empty);
 
-            if (args.Caller.GetUser(args.Message.Realname)?.Access > 1)
-                command.Arguments = "Insufficient permissions.";
-            else if (args.Message.SplitArgs.Count < 3)
+            if (args.Message.SplitArgs.Count < 3)
                 command.Arguments = "Insufficient parameters. Type 'eve help part' to view command's help index.";
             else if (args.Message.SplitArgs.Count < 2 || !args.Message.SplitArgs[2].StartsWith("#"))
                 command.Arguments = "Channel parameter must be a proper name (starts with '#').";
@@ -387,9 +385,6 @@ namespace Convex.Example.Plugin {
                 await DoCallback(this, new PluginActionEventArgs(PluginActionType.SendMessage, command, Name));
                 return;
             }
-
-            if (args.Caller.GetUser(args.Message.Nickname)?.Access > 0)
-                command.Arguments = "Insufficient permissions.";
 
             Status = PluginStatus.Stopped;
         }

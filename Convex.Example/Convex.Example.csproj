@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <Reference Include="Convex.Event">
-      <HintPath>..\..\Convex.Event\Convex.Event\bin\Debug\netstandard2.0\Convex.Event.dll</HintPath>
+      <HintPath>..\..\Convex.Event\Convex.Event\bin\Debug\netcoreapp2.0\Convex.Event.dll</HintPath>
     </Reference>
     <Reference Include="Convex.IRC">
       <HintPath>..\..\Convex.IRC\Convex.IRC\bin\Debug\netcoreapp2.0\Convex.IRC.dll</HintPath>
